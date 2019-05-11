@@ -163,7 +163,27 @@ int main(int argc, char ** argv)
         lastArr.push_back(min);
         it[mini]++;
     }
-    output(rank, lastArr);
+
+    vector<int> printArr[4];
+    if(rank != 0){
+        int msize = lastArr.size();
+        MPI_Send(&msize, 1, MPI_INT, 0, 4, MPI_COMM_WORLD);
+        MPI_Send(&(*lastArr.begin()), msize, MPI_INT, 0, 5, MPI_COMM_WORLD);
+    }else{
+        int rsize;
+        printArr[0] = lastArr;
+        for(int i=1; i<pSize; i++){
+            int tmp[30];
+            MPI_Recv(&rsize, 1, MPI_INT, i, 4, MPI_COMM_WORLD, &status);
+            MPI_Recv(&tmp, rsize, MPI_INT, i, 5, MPI_COMM_WORLD, &status);
+            for(int j=0; j<rsize; j++){
+                printArr[i].push_back(tmp[j]);
+            }
+        }
+        for(int i=0; i<pSize; i++){
+            output(i, printArr[i]);
+        }
+    }
     
 
 
